@@ -20,8 +20,10 @@ function injectScript(file_path, tag) {
 chrome.storage.sync.get("CH3", ({ CH3 }) => {
   window.CH3_ENABLED = CH3;
   console.log(`Set window.CH3_ENABLED to ${window.CH3_ENABLED}`);
+  // TODO: inject a script that changes [window.CH3_ENABLED = CH3;]
 });
 
-// injectScript(chrome.extension.getURL('content.js'), 'body');
+// Note: this is depricated [injectScript(chrome.extension.getURL('content.js'), 'body');]
+// BUG: don't inject [ethers-5.2.umd.min.js] if it is already on the page
 injectScript(chrome.runtime.getURL('ethers-5.2.umd.min.js'), 'head');
 injectScript(chrome.runtime.getURL('content.js'), 'body');
