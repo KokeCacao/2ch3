@@ -7,6 +7,7 @@
  * 3. You can listen to the incoming messages
  */
 let activeInput;
+let editingComment;
 let loaded = false;
 
 // pressing
@@ -141,26 +142,7 @@ function addComment(message) {
   return comment;
 }
 
-// [event.target] is not accessable because it is only readable not writeable, use [event.pressed] instead
-function onLongClick(event) {
-  console.log("Click Event Registered");
-
-  if (event.pressed.className == 'ch3') {
-    document.body.style.cursor = "auto"; // WARNING: this may be incorrect for different website
-    console.log("You are clicking an existing comment!");
-    // TODO: edit mode
-    return;
-  }
-  // BUG: doesn't sync with extension
-  if (!window.CH3_ENABLED) return;
-  console.log("Click Pass Through");
-
-  const x = event.pageX;
-  const y = event.pageY;
-  // size of seen current window
-  const borderX = document.getElementsByTagName('body')[0] ? document.getElementsByTagName('body')[0].clientWidth : window.innerWidth;
-  const borderY = document.getElementsByTagName('body')[0] ? document.getElementsByTagName('body')[0].clientWidth : window.innerHeight;
-
+function createInput(x, y, data, hint) {
   let input = document.createElement("textarea");
   input.type = "text";
   // Alternative way to make exact input textbox: https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/
@@ -173,6 +155,8 @@ function onLongClick(event) {
   // resize: none (so you can't resize input box)
   input.style = `font-family: monospace; margin: 0; padding: 0; border: none; position:absolute; top: ${y}px; left: ${x}px; background-color: #00000000; outline-width: 0; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none; width: ${document.body.scrollWidth - x}px; max-height: ${document.body.scrollHeight - y}px; word-break: break-all; overflow: hidden; resize: none;`;
   input.rows = 1; // textarea
+  input.setAttribute('placeholder', hint);
+  input.innerHTML = data;
   // auto height
   input.addEventListener('input', (event) => {
     event.target.style.height = (event.target.scrollHeight) + "px";
@@ -218,6 +202,30 @@ function onLongClick(event) {
   activeInput = form;
 }
 
+// [event.target] is not accessable because it is only readable not writeable, use [event.pressed] instead
+function onLongClick(event) {
+  console.log("Click Event Registered");
+  const x = event.pageX;
+  const y = event.pageY;
+
+  if (event.pressed.className == 'ch3') {
+    document.body.style.cursor = "auto"; // WARNING: this may be incorrect for different website
+    console.log("You are clicking an existing comment and wish to edit it");
+    editingComment = event.pressed;
+    createInput(parseInt(editingComment.style.left, 10), parseInt(editingComment.style.top, 10), editingComment.innerText, '');
+    editingComment.style.visibility = "hidden";
+    return;
+  }
+  // BUG: doesn't sync with extension
+  if (!window.CH3_ENABLED) return;
+  console.log("Click Pass Through");
+
+  // size of seen current window
+  // const borderX = document.getElementsByTagName('body')[0] ? document.getElementsByTagName('body')[0].clientWidth : window.innerWidth;
+  // const borderY = document.getElementsByTagName('body')[0] ? document.getElementsByTagName('body')[0].clientWidth : window.innerHeight;
+  createInput(x, y, '', 'Start typing...');
+}
+
 function loadComments() {
   switchNetwork(() => {
     read2CH3(window.location.href);
@@ -242,7 +250,7 @@ function onLoad2CH3() {
       timerAnimationID = requestAnimationFrame(longPressTimer);
       longPressCounter++;
     } else {
-      document.body.style.cursor = "text";
+      document.body.style.cursor = "crosshair";
     }
   }
   function pressingDown(e) {
@@ -252,6 +260,12 @@ function onLoad2CH3() {
       activeInput = undefined;
       document.body.style.cursor = "auto"; // WARNING: this may be incorrect for different website
       console.log("Removed Active Input");
+      
+      if (editingComment !== undefined) {
+        editingComment.style.visibility = "visible";
+        editingComment = undefined;
+        console.log("Set visible");
+      }
       return;
     }
     // Start the timer
