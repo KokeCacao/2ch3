@@ -9,8 +9,14 @@
 let activeInput;
 let loaded = false;
 
+// pressing
+let timerAnimationID;
+let longPressCounter = 0;
+let longPressDuration = 50;
+let longPressEvent = new CustomEvent("longPress");
+
 const contractAddress = '0x3cE619987873bA4C1FD02aBD4b65fefF7826072D';
-const abi = [{"type":"constructor","stateMutability":"nonpayable","inputs":[]},{"type":"event","name":"MessageEdit","inputs":[{"type":"uint256","name":"messageNonce","internalType":"uint256","indexed":false},{"type":"address","name":"owner","internalType":"address","indexed":true},{"type":"uint256","name":"ownerNonce","internalType":"uint256","indexed":false},{"type":"uint256","name":"timestamp","internalType":"uint256","indexed":false},{"type":"uint256","name":"lastTempChange","internalType":"uint256","indexed":false},{"type":"uint256","name":"x","internalType":"uint256","indexed":false},{"type":"uint256","name":"y","internalType":"uint256","indexed":false},{"type":"bytes16","name":"temperature","internalType":"bytes16","indexed":false},{"type":"string","name":"payload","internalType":"string","indexed":false},{"type":"string","name":"url","internalType":"string","indexed":true}],"anonymous":false},{"type":"event","name":"MessageSent","inputs":[{"type":"uint256","name":"messageNonce","internalType":"uint256","indexed":false},{"type":"address","name":"owner","internalType":"address","indexed":true},{"type":"uint256","name":"ownerNonce","internalType":"uint256","indexed":false},{"type":"uint256","name":"timestamp","internalType":"uint256","indexed":false},{"type":"uint256","name":"lastTempChange","internalType":"uint256","indexed":false},{"type":"uint256","name":"x","internalType":"uint256","indexed":false},{"type":"uint256","name":"y","internalType":"uint256","indexed":false},{"type":"bytes16","name":"temperature","internalType":"bytes16","indexed":false},{"type":"string","name":"payload","internalType":"string","indexed":false},{"type":"string","name":"url","internalType":"string","indexed":true}],"anonymous":false},{"type":"fallback","stateMutability":"payable"},{"type":"function","stateMutability":"view","outputs":[{"type":"uint256","name":"","internalType":"uint256"}],"name":"DEBUG_TIME","inputs":[]},{"type":"function","stateMutability":"view","outputs":[{"type":"address","name":"","internalType":"address payable"}],"name":"OWNER","inputs":[]},{"type":"function","stateMutability":"nonpayable","outputs":[],"name":"destroy","inputs":[]},{"type":"function","stateMutability":"payable","outputs":[],"name":"downVote","inputs":[{"type":"uint256","name":"messageId","internalType":"uint256"}]},{"type":"function","stateMutability":"payable","outputs":[],"name":"edit","inputs":[{"type":"string","name":"payload","internalType":"string"},{"type":"uint256","name":"messageId","internalType":"uint256"}]},{"type":"function","stateMutability":"view","outputs":[{"type":"uint256","name":"","internalType":"uint256"}],"name":"messageNonce","inputs":[]},{"type":"function","stateMutability":"view","outputs":[{"type":"address","name":"owner","internalType":"address"},{"type":"uint256","name":"ownerNonce","internalType":"uint256"},{"type":"uint256","name":"timestamp","internalType":"uint256"},{"type":"uint256","name":"lastTempChange","internalType":"uint256"},{"type":"uint256","name":"x","internalType":"uint256"},{"type":"uint256","name":"y","internalType":"uint256"},{"type":"bytes16","name":"temperature","internalType":"bytes16"},{"type":"string","name":"payload","internalType":"string"},{"type":"string","name":"url","internalType":"string"}],"name":"messages","inputs":[{"type":"uint256","name":"","internalType":"uint256"}]},{"type":"function","stateMutability":"view","outputs":[{"type":"uint256","name":"","internalType":"uint256"}],"name":"ownerNonces","inputs":[{"type":"address","name":"","internalType":"address"}]},{"type":"function","stateMutability":"payable","outputs":[],"name":"post","inputs":[{"type":"string","name":"payload","internalType":"string"},{"type":"string","name":"url","internalType":"string"},{"type":"uint256","name":"x","internalType":"uint256"},{"type":"uint256","name":"y","internalType":"uint256"}]},{"type":"function","stateMutability":"view","outputs":[{"type":"tuple[]","name":"filteredMessages","internalType":"struct CH3.Message[]","components":[{"type":"address","name":"owner","internalType":"address"},{"type":"uint256","name":"ownerNonce","internalType":"uint256"},{"type":"uint256","name":"timestamp","internalType":"uint256"},{"type":"uint256","name":"lastTempChange","internalType":"uint256"},{"type":"uint256","name":"x","internalType":"uint256"},{"type":"uint256","name":"y","internalType":"uint256"},{"type":"bytes16","name":"temperature","internalType":"bytes16"},{"type":"string","name":"payload","internalType":"string"},{"type":"string","name":"url","internalType":"string"}]}],"name":"read","inputs":[{"type":"string","name":"url","internalType":"string"}]},{"type":"function","stateMutability":"payable","outputs":[],"name":"upVote","inputs":[{"type":"uint256","name":"messageId","internalType":"uint256"}]},{"type":"function","stateMutability":"view","outputs":[{"type":"uint256","name":"","internalType":"uint256"}],"name":"url2MessageId","inputs":[{"type":"string","name":"","internalType":"string"},{"type":"uint256","name":"","internalType":"uint256"}]},{"type":"receive","stateMutability":"payable"}]
+const abi = [{ "type": "constructor", "stateMutability": "nonpayable", "inputs": [] }, { "type": "event", "name": "MessageEdit", "inputs": [{ "type": "uint256", "name": "messageNonce", "internalType": "uint256", "indexed": false }, { "type": "address", "name": "owner", "internalType": "address", "indexed": true }, { "type": "uint256", "name": "ownerNonce", "internalType": "uint256", "indexed": false }, { "type": "uint256", "name": "timestamp", "internalType": "uint256", "indexed": false }, { "type": "uint256", "name": "lastTempChange", "internalType": "uint256", "indexed": false }, { "type": "uint256", "name": "x", "internalType": "uint256", "indexed": false }, { "type": "uint256", "name": "y", "internalType": "uint256", "indexed": false }, { "type": "bytes16", "name": "temperature", "internalType": "bytes16", "indexed": false }, { "type": "string", "name": "payload", "internalType": "string", "indexed": false }, { "type": "string", "name": "url", "internalType": "string", "indexed": true }], "anonymous": false }, { "type": "event", "name": "MessageSent", "inputs": [{ "type": "uint256", "name": "messageNonce", "internalType": "uint256", "indexed": false }, { "type": "address", "name": "owner", "internalType": "address", "indexed": true }, { "type": "uint256", "name": "ownerNonce", "internalType": "uint256", "indexed": false }, { "type": "uint256", "name": "timestamp", "internalType": "uint256", "indexed": false }, { "type": "uint256", "name": "lastTempChange", "internalType": "uint256", "indexed": false }, { "type": "uint256", "name": "x", "internalType": "uint256", "indexed": false }, { "type": "uint256", "name": "y", "internalType": "uint256", "indexed": false }, { "type": "bytes16", "name": "temperature", "internalType": "bytes16", "indexed": false }, { "type": "string", "name": "payload", "internalType": "string", "indexed": false }, { "type": "string", "name": "url", "internalType": "string", "indexed": true }], "anonymous": false }, { "type": "fallback", "stateMutability": "payable" }, { "type": "function", "stateMutability": "view", "outputs": [{ "type": "uint256", "name": "", "internalType": "uint256" }], "name": "DEBUG_TIME", "inputs": [] }, { "type": "function", "stateMutability": "view", "outputs": [{ "type": "address", "name": "", "internalType": "address payable" }], "name": "OWNER", "inputs": [] }, { "type": "function", "stateMutability": "nonpayable", "outputs": [], "name": "destroy", "inputs": [] }, { "type": "function", "stateMutability": "payable", "outputs": [], "name": "downVote", "inputs": [{ "type": "uint256", "name": "messageId", "internalType": "uint256" }] }, { "type": "function", "stateMutability": "payable", "outputs": [], "name": "edit", "inputs": [{ "type": "string", "name": "payload", "internalType": "string" }, { "type": "uint256", "name": "messageId", "internalType": "uint256" }] }, { "type": "function", "stateMutability": "view", "outputs": [{ "type": "uint256", "name": "", "internalType": "uint256" }], "name": "messageNonce", "inputs": [] }, { "type": "function", "stateMutability": "view", "outputs": [{ "type": "address", "name": "owner", "internalType": "address" }, { "type": "uint256", "name": "ownerNonce", "internalType": "uint256" }, { "type": "uint256", "name": "timestamp", "internalType": "uint256" }, { "type": "uint256", "name": "lastTempChange", "internalType": "uint256" }, { "type": "uint256", "name": "x", "internalType": "uint256" }, { "type": "uint256", "name": "y", "internalType": "uint256" }, { "type": "bytes16", "name": "temperature", "internalType": "bytes16" }, { "type": "string", "name": "payload", "internalType": "string" }, { "type": "string", "name": "url", "internalType": "string" }], "name": "messages", "inputs": [{ "type": "uint256", "name": "", "internalType": "uint256" }] }, { "type": "function", "stateMutability": "view", "outputs": [{ "type": "uint256", "name": "", "internalType": "uint256" }], "name": "ownerNonces", "inputs": [{ "type": "address", "name": "", "internalType": "address" }] }, { "type": "function", "stateMutability": "payable", "outputs": [], "name": "post", "inputs": [{ "type": "string", "name": "payload", "internalType": "string" }, { "type": "string", "name": "url", "internalType": "string" }, { "type": "uint256", "name": "x", "internalType": "uint256" }, { "type": "uint256", "name": "y", "internalType": "uint256" }] }, { "type": "function", "stateMutability": "view", "outputs": [{ "type": "tuple[]", "name": "filteredMessages", "internalType": "struct CH3.Message[]", "components": [{ "type": "address", "name": "owner", "internalType": "address" }, { "type": "uint256", "name": "ownerNonce", "internalType": "uint256" }, { "type": "uint256", "name": "timestamp", "internalType": "uint256" }, { "type": "uint256", "name": "lastTempChange", "internalType": "uint256" }, { "type": "uint256", "name": "x", "internalType": "uint256" }, { "type": "uint256", "name": "y", "internalType": "uint256" }, { "type": "bytes16", "name": "temperature", "internalType": "bytes16" }, { "type": "string", "name": "payload", "internalType": "string" }, { "type": "string", "name": "url", "internalType": "string" }] }], "name": "read", "inputs": [{ "type": "string", "name": "url", "internalType": "string" }] }, { "type": "function", "stateMutability": "payable", "outputs": [], "name": "upVote", "inputs": [{ "type": "uint256", "name": "messageId", "internalType": "uint256" }] }, { "type": "function", "stateMutability": "view", "outputs": [{ "type": "uint256", "name": "", "internalType": "uint256" }], "name": "url2MessageId", "inputs": [{ "type": "string", "name": "", "internalType": "string" }, { "type": "uint256", "name": "", "internalType": "uint256" }] }, { "type": "receive", "stateMutability": "payable" }]
 
 let provider;
 
@@ -131,7 +137,7 @@ function addComment(value, x, y, owner, timestamp, temperature) {
   return comment;
 }
 
-function onClick(event) {
+function onLongClick(event) {
   // TODO: long click to activate only
   console.log("Click Event Registered");
   if (event.target.className == 'ch3') {
@@ -142,14 +148,6 @@ function onClick(event) {
   // BUG: doesn't sync with extension
   if (!window.CH3_ENABLED) return;
   console.log("Click Pass Through");
-
-  // remove unsaved text
-  if (activeInput !== undefined) {
-    activeInput.remove();
-    activeInput = undefined;
-    console.log("Removed Active Input");
-    return;
-  }
 
   const x = event.pageX;
   const y = event.pageY;
@@ -233,7 +231,39 @@ function onLoad2CH3() {
   // load Web3
   if (provider === undefined) provider = new ethers.providers.Web3Provider(window.ethereum, "any");
 
-  document.addEventListener("click", onClick);
+  function longPressTimer() {
+    if (longPressCounter < longPressDuration) {
+      timerAnimationID = requestAnimationFrame(longPressTimer);
+      longPressCounter++;
+    } else {
+      document.dispatchEvent(longPressEvent);
+    }
+  }
+  function pressingDown(e) {
+    // remove unsaved text if exist
+    if (activeInput !== undefined) {
+      activeInput.remove();
+      activeInput = undefined;
+      console.log("Removed Active Input");
+      return;
+    }
+    // Start the timer
+    requestAnimationFrame(longPressTimer);
+    longPressEvent.pageX = e.pageX;
+    longPressEvent.pageY = e.pageY;
+    longPressEvent.target = e.target;
+  }
+  function notPressingDown(e) {
+    // Stop the timer
+    cancelAnimationFrame(timerAnimationID);
+    longPressCounter = 0;
+  }
+  document.addEventListener("mousedown", pressingDown, false);
+  document.addEventListener("mouseup", notPressingDown, false);
+  document.addEventListener("mouseleave", notPressingDown, false);
+  document.addEventListener("touchstart", pressingDown, false);
+  document.addEventListener("touchend", notPressingDown, false);
+  document.addEventListener("longPress", onLongClick, false);
 
   // add DOM
   let inputs_div = document.createElement("div");
