@@ -14,11 +14,31 @@ let timerAnimationID;
 let longPressCounter = 0;
 let longPressDuration = 50;
 let longPressEvent = new CustomEvent("longPress");
+let mouseDownX;
+let mouseDownY;
 
 const contractAddress = '0x3cE619987873bA4C1FD02aBD4b65fefF7826072D';
 const abi = [{ "type": "constructor", "stateMutability": "nonpayable", "inputs": [] }, { "type": "event", "name": "MessageEdit", "inputs": [{ "type": "uint256", "name": "messageNonce", "internalType": "uint256", "indexed": false }, { "type": "address", "name": "owner", "internalType": "address", "indexed": true }, { "type": "uint256", "name": "ownerNonce", "internalType": "uint256", "indexed": false }, { "type": "uint256", "name": "timestamp", "internalType": "uint256", "indexed": false }, { "type": "uint256", "name": "lastTempChange", "internalType": "uint256", "indexed": false }, { "type": "uint256", "name": "x", "internalType": "uint256", "indexed": false }, { "type": "uint256", "name": "y", "internalType": "uint256", "indexed": false }, { "type": "bytes16", "name": "temperature", "internalType": "bytes16", "indexed": false }, { "type": "string", "name": "payload", "internalType": "string", "indexed": false }, { "type": "string", "name": "url", "internalType": "string", "indexed": true }], "anonymous": false }, { "type": "event", "name": "MessageSent", "inputs": [{ "type": "uint256", "name": "messageNonce", "internalType": "uint256", "indexed": false }, { "type": "address", "name": "owner", "internalType": "address", "indexed": true }, { "type": "uint256", "name": "ownerNonce", "internalType": "uint256", "indexed": false }, { "type": "uint256", "name": "timestamp", "internalType": "uint256", "indexed": false }, { "type": "uint256", "name": "lastTempChange", "internalType": "uint256", "indexed": false }, { "type": "uint256", "name": "x", "internalType": "uint256", "indexed": false }, { "type": "uint256", "name": "y", "internalType": "uint256", "indexed": false }, { "type": "bytes16", "name": "temperature", "internalType": "bytes16", "indexed": false }, { "type": "string", "name": "payload", "internalType": "string", "indexed": false }, { "type": "string", "name": "url", "internalType": "string", "indexed": true }], "anonymous": false }, { "type": "fallback", "stateMutability": "payable" }, { "type": "function", "stateMutability": "view", "outputs": [{ "type": "uint256", "name": "", "internalType": "uint256" }], "name": "DEBUG_TIME", "inputs": [] }, { "type": "function", "stateMutability": "view", "outputs": [{ "type": "address", "name": "", "internalType": "address payable" }], "name": "OWNER", "inputs": [] }, { "type": "function", "stateMutability": "nonpayable", "outputs": [], "name": "destroy", "inputs": [] }, { "type": "function", "stateMutability": "payable", "outputs": [], "name": "downVote", "inputs": [{ "type": "uint256", "name": "messageId", "internalType": "uint256" }] }, { "type": "function", "stateMutability": "payable", "outputs": [], "name": "edit", "inputs": [{ "type": "string", "name": "payload", "internalType": "string" }, { "type": "uint256", "name": "messageId", "internalType": "uint256" }] }, { "type": "function", "stateMutability": "view", "outputs": [{ "type": "uint256", "name": "", "internalType": "uint256" }], "name": "messageNonce", "inputs": [] }, { "type": "function", "stateMutability": "view", "outputs": [{ "type": "address", "name": "owner", "internalType": "address" }, { "type": "uint256", "name": "ownerNonce", "internalType": "uint256" }, { "type": "uint256", "name": "timestamp", "internalType": "uint256" }, { "type": "uint256", "name": "lastTempChange", "internalType": "uint256" }, { "type": "uint256", "name": "x", "internalType": "uint256" }, { "type": "uint256", "name": "y", "internalType": "uint256" }, { "type": "bytes16", "name": "temperature", "internalType": "bytes16" }, { "type": "string", "name": "payload", "internalType": "string" }, { "type": "string", "name": "url", "internalType": "string" }], "name": "messages", "inputs": [{ "type": "uint256", "name": "", "internalType": "uint256" }] }, { "type": "function", "stateMutability": "view", "outputs": [{ "type": "uint256", "name": "", "internalType": "uint256" }], "name": "ownerNonces", "inputs": [{ "type": "address", "name": "", "internalType": "address" }] }, { "type": "function", "stateMutability": "payable", "outputs": [], "name": "post", "inputs": [{ "type": "string", "name": "payload", "internalType": "string" }, { "type": "string", "name": "url", "internalType": "string" }, { "type": "uint256", "name": "x", "internalType": "uint256" }, { "type": "uint256", "name": "y", "internalType": "uint256" }] }, { "type": "function", "stateMutability": "view", "outputs": [{ "type": "tuple[]", "name": "filteredMessages", "internalType": "struct CH3.Message[]", "components": [{ "type": "address", "name": "owner", "internalType": "address" }, { "type": "uint256", "name": "ownerNonce", "internalType": "uint256" }, { "type": "uint256", "name": "timestamp", "internalType": "uint256" }, { "type": "uint256", "name": "lastTempChange", "internalType": "uint256" }, { "type": "uint256", "name": "x", "internalType": "uint256" }, { "type": "uint256", "name": "y", "internalType": "uint256" }, { "type": "bytes16", "name": "temperature", "internalType": "bytes16" }, { "type": "string", "name": "payload", "internalType": "string" }, { "type": "string", "name": "url", "internalType": "string" }] }], "name": "read", "inputs": [{ "type": "string", "name": "url", "internalType": "string" }] }, { "type": "function", "stateMutability": "payable", "outputs": [], "name": "upVote", "inputs": [{ "type": "uint256", "name": "messageId", "internalType": "uint256" }] }, { "type": "function", "stateMutability": "view", "outputs": [{ "type": "uint256", "name": "", "internalType": "uint256" }], "name": "url2MessageId", "inputs": [{ "type": "string", "name": "", "internalType": "string" }, { "type": "uint256", "name": "", "internalType": "uint256" }] }, { "type": "receive", "stateMutability": "payable" }]
 
 let provider;
+
+// thanks: https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
+const cyrb53 = function(str, seed = 0) {
+  let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+  for (let i = 0, ch; i < str.length; i++) {
+      ch = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1>>>16), 2246822507) ^ Math.imul(h2 ^ (h2>>>13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2>>>16), 2246822507) ^ Math.imul(h1 ^ (h1>>>13), 3266489909);
+  return 4294967296 * (2097151 & h2) + (h1>>>0);
+};
+
+function message2Id(message) {
+  // TODO: update when contract change that has a original date
+  return cyrb53(`${message.x}|${message.y}|${message.owner}`);
+}
 
 function displayableHex(a) {
   let str = `${a}`;
@@ -96,21 +116,6 @@ function post2CH3(message, url, x, y, successCallback, failureCallback) {
   });
 }
 
-// function read2CH3() {
-//   const contract = new ethers.Contract(contractAddress, abi, provider);
-
-//   contract.messageNonce().then((nonce) => {
-//     console.log(`Got nonce = ${nonce}`);
-//     for (let i = 0; i < nonce; i++) {
-//       console.log(`loading message ${i}`);
-//       contract.messages(i).then((message) => {
-//         console.log(`${message.x}, ${message.y}: ${message.payload}`);
-//         addComment(message.x, message.y, message.payload);
-//       }, (errno) => console.log(`Error ${errno.code}: ${errno.message}`));
-//     }
-//   }, (errno) => console.log(`Error ${errno.code}: ${errno.message}`));
-// }
-
 function read2CH3(url) {
   const contract = new ethers.Contract(contractAddress, abi, provider);
   document.querySelectorAll('.ch3').forEach(e => e.remove());
@@ -118,29 +123,30 @@ function read2CH3(url) {
   contract.read(url).then((filteredMessages) => {
     filteredMessages.map((message) => {
       console.log(`${message.x}, ${message.y}: ${message.payload}`);
-      addComment(message.payload, message.x, message.y, message.owner, message.timestamp, message.temperature);
+      addComment(message);
     });
   }, (errno) => console.log(`Error ${errno.code}: ${errno.message}`));
 }
 
-function addComment(value, x, y, owner, timestamp, temperature) {
+function addComment(message) {
   let comment = document.createElement("p");
-  // TODO: show id when hover
-  // TODO: parse comment id
   comment.className = 'ch3';
-  comment.owner = owner;
-  comment.timestamp = timestamp;
-  comment.temperature = temperature;
-  comment.style = `font-family: monospace; margin: 0; padding: 0; border: none; position:absolute; top: ${y}px; left: ${x}px; background-color: #00000000; outline-width: 0; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none; width: ${document.body.scrollWidth - x}px; max-height: ${document.body.scrollHeight - y}px; word-break: break-all; overflow: hidden;`;
-  comment.innerText = value;
+  comment.setAttribute('title', `Id: ${message2Id(message)}\nOwner: ${message.owner}\nTime:${message.timestamp}\nLv:${message.temperature}`);
+  comment.setAttribute('owner', message.owner);
+  comment.setAttribute('timestamp', message.timestamp);
+  comment.setAttribute('temperature', message.temperature);
+  comment.style = `font-family: monospace; margin: 0; padding: 0; border: none; position:absolute; top: ${message.y}px; left: ${message.x}px; background-color: #00000000; outline-width: 0; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none; width: ${document.body.scrollWidth - message.x}px; max-height: ${document.body.scrollHeight - message.y}px; word-break: break-all; overflow: hidden;`;
+  comment.innerText = message.payload;
   document.getElementById("comments").appendChild(comment);
   return comment;
 }
 
+// [event.target] is not accessable because it is only readable not writeable, use [event.pressed] instead
 function onLongClick(event) {
-  // TODO: long click to activate only
   console.log("Click Event Registered");
-  if (event.target.className == 'ch3') {
+
+  if (event.pressed.className == 'ch3') {
+    document.body.style.cursor = "auto"; // WARNING: this may be incorrect for different website
     console.log("You are clicking an existing comment!");
     // TODO: edit mode
     return;
@@ -236,7 +242,7 @@ function onLoad2CH3() {
       timerAnimationID = requestAnimationFrame(longPressTimer);
       longPressCounter++;
     } else {
-      document.dispatchEvent(longPressEvent);
+      document.body.style.cursor = "text";
     }
   }
   function pressingDown(e) {
@@ -244,16 +250,23 @@ function onLoad2CH3() {
     if (activeInput !== undefined) {
       activeInput.remove();
       activeInput = undefined;
+      document.body.style.cursor = "auto"; // WARNING: this may be incorrect for different website
       console.log("Removed Active Input");
       return;
     }
     // Start the timer
     requestAnimationFrame(longPressTimer);
+    mouseDownX = e.pageX;
+    mouseDownY = e.pageY;
     longPressEvent.pageX = e.pageX;
     longPressEvent.pageY = e.pageY;
-    longPressEvent.target = e.target;
+    longPressEvent.pressed = e.target ? e.target : e.srcElement;
   }
   function notPressingDown(e) {
+    if (longPressCounter >= longPressDuration) {
+      if ((mouseDownX - e.pageX)**2 + (mouseDownY - e.pageY)**2 > 4) return; // mouse drag
+      document.dispatchEvent(longPressEvent);
+    }
     // Stop the timer
     cancelAnimationFrame(timerAnimationID);
     longPressCounter = 0;
